@@ -69,7 +69,10 @@ class Player():
 		self.stick = ""
 
 	def printResult(self,stick):
-		pass
+		if self.stick == stick:
+			print("can send "+str(self.nbet)+" sips to somebody")
+		else:
+			print("has to drink "+str(self.nbet*2)+" sips")
 	def setBet(self,bet,stick):
 		self.nbet = bet
 		self.stick = stick
@@ -152,25 +155,34 @@ class Table():
 			self.printTable()
 
 	def checkWinCondition(self):
+		i = 0
 		if self.asCor.position == self.maxPosition:
 			print("Cor WIN!!")
 			for player in self.players:
+				print("Player "+str(i)+" ", end="")
 				player.printResult("Cor")
+				i += 1
 			exit(0)
 		elif self.asTreb.position == self.maxPosition:
 			print("Treb WIN!!")
 			for player in self.players:
-				player.printResult("Treb")		
+				print("Player "+str(i)+" ", end="")
+				player.printResult("Treb")
+				i += 1		
 			exit(0)
 		elif self.asPicas.position == self.maxPosition:
 			print("Picas WIN!!")
 			for player in self.players:
+				print("Player "+str(i)+" ", end="")
 				player.printResult("Picas")
+				i += 1
 			exit(0)
 		elif self.asDiam.position == self.maxPosition:
 			print("Diam WIN!!")
 			for player in self.players:
+				print("Player "+str(i)+" ", end="")
 				player.printResult("Diam")
+				i += 1
 			exit(0)
 
 	def printTable(self):
@@ -243,7 +255,7 @@ for p in table.players:
 
 
 ##Let PLAY!
-print("You have 3 options to play:")
+print("You have 3 options:")
 print("Write '1' or press enter to play")
 print("Write '2' to reset")
 print("Write '3' to end")
