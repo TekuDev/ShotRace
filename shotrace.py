@@ -42,6 +42,8 @@ class Deck():
 		self.nDiam = 13
 
 	def nextCard(self):
+		if self.nCor == 0 and self.nTreb == 0 and self.nPicas == 0 and self.nDiam == 0:
+			self.reset()
 		nextStick = ""
 		while nextStick == "":
 			rand = random.randrange(4)
@@ -57,9 +59,6 @@ class Deck():
 			elif rand == 3 and self.nDiam > 0:
 				self.nDiam -= 1
 				nextStick = "Diam"
-			else:
-				#error
-				nextStick = "ERROR"
 
 		return nextStick
 
@@ -69,7 +68,7 @@ class Player():
 		self.nbet = 0
 		self.stick = ""
 
-	def printResult(self):
+	def printResult(self,stick):
 		pass
 	def setBet(self,bet,stick):
 		self.nbet = bet
@@ -88,6 +87,7 @@ class Table():
 		self.lastCard = "NoCard"
 		self.winner = False
 		self.maxPosition = (maxSteps+1)
+		self.currentMaxPosition = 0
 
 		self.players = []
 		for x in range(0,nplayers):
@@ -101,6 +101,18 @@ class Table():
 
 	def play(self):
 		#nextCard
+		self.nextCard()	
+
+		#printTheNewTable
+		self.printTable()
+
+		#check steps
+		self.checkSteps()
+
+		#Check the win condition
+		self.checkWinCondition()
+		
+	def nextCard(self):
 		self.lastCard = self.deck.nextCard()
 		if self.lastCard == "Cor":
 			self.asCor.push()
@@ -111,23 +123,54 @@ class Table():
 		elif self.lastCard == "Diam":
 			self.asDiam.push()
 		else:
-			print("ERROR")
+			print("ERROR in next card")
 			exit(0)
 
-		#printTheNewTable
-		self.printTable()
-		#Check the win condition
+		if self.asCor.position > self.currentMaxPosition:
+				self.currentMaxPosition = self.asCor.position
+		elif self.asTreb.position > self.currentMaxPosition:
+				self.currentMaxPosition = self.asTreb.position
+		elif self.asPicas.position > self.currentMaxPosition:
+				self.currentMaxPosition = self.asPicas.position
+		elif self.asDiam.position > self.currentMaxPosition:
+				self.currentMaxPosition = self.asDiam.position
+
+	def checkSteps(self):
+		if self.currentMaxPosition > 0 and self.currentMaxPosition < self.maxPosition and not self.steps[(self.currentMaxPosition-1)].isShown:
+			stick = self.steps[(self.currentMaxPosition-1)].show()
+			if stick == "Cor":
+				self.asCor.back()
+			elif stick == "Treb":
+				self.asTreb.back()
+			elif stick == "Picas":
+				self.asPicas.back()
+			elif stick == "Diam":
+				self.asDiam.back()
+			else:
+				print("ERROR in check steps")
+				exit(0)
+			self.printTable()
+
+	def checkWinCondition(self):
 		if self.asCor.position == self.maxPosition:
 			print("Cor WIN!!")
+			for player in self.players:
+				player.printResult("Cor")
 			exit(0)
 		elif self.asTreb.position == self.maxPosition:
-			print("Treb WIN!!")			
+			print("Treb WIN!!")
+			for player in self.players:
+				player.printResult("Treb")		
 			exit(0)
 		elif self.asPicas.position == self.maxPosition:
 			print("Picas WIN!!")
+			for player in self.players:
+				player.printResult("Picas")
 			exit(0)
 		elif self.asDiam.position == self.maxPosition:
 			print("Diam WIN!!")
+			for player in self.players:
+				player.printResult("Diam")
 			exit(0)
 
 	def printTable(self):
@@ -167,9 +210,8 @@ class Table():
 #main
 
 ##define table
-#TODO: revisar el \n y los inputs con/sin preguntas
 nplayers = int(input("How many players? "))
-nsteps = int(input("How many steps? \n"))
+nsteps = int(input("How many steps? "))
 
 table = Table(nplayers,nsteps)
 
@@ -187,8 +229,8 @@ for s in table.steps:
 ##define bets
 i = 0
 for p in table.players:
-	bet4player = int(input("How many bet the player "+str(i)+" want to bet? "))
-	stick4player = input("From which stick? (Cor, Treb, Picas, Diam) \n")
+	bet4player = int(input("How many bets does the player "+str(i)+"? "))
+	stick4player = input("From which stick? (Cor, Treb, Picas, Diam) ")
 	while stick4player != "Cor" and stick4player != "Treb" and stick4player != "Picas" and stick4player != "Diam":
 		print("The player has to choice between 'Cor' or 'Treb' or 'Picas' or 'Diam'")
 		stick4player = input("From which stick? (Cor, Treb, Picas, Diam) ")
@@ -202,13 +244,15 @@ for p in table.players:
 
 ##Let PLAY!
 print("You have 3 options to play:")
-print("Write '1' to play")
+print("Write '1' or press enter to play")
 print("Write '2' to reset")
 print("Write '3' to end")
 
 table.printTable()
 
-option = int(input("Select your option (1,2 or 3) "))
+option = input("Select your option (1,2 or 3) ")
+if option != '':
+	option = int(option)
 while(option != 3):
 	if option == 2:
 		#reset shit
@@ -216,4 +260,7 @@ while(option != 3):
 	else: #PLAY
 		table.play()
 
-	option = int(input("Select your option (1,2 or 3) "))
+	
+	option = input("Select your option (1,2 or 3) ")
+	if option != '':
+		option = int(option)
